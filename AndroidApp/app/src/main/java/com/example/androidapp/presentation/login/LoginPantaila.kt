@@ -1,8 +1,8 @@
-package com.example.loginapp.ui
+package com.example.androidapp.presentation.login
 
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.*
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.loginapp.viewmodel.LoginPantailaViewModel
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.ui.Modifier
@@ -11,15 +11,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
-
+import com.example.androidapp.data.model.EremuEzarri
+import androidx.navigation.NavController
 
 @Composable
-fun LoginPantaila(viewModel: LoginPantailaViewModel = viewModel()) {
-    val state = viewModel.state
+fun LoginPantaila(
+    navController: NavController,
+    viewModel: LoginPantailaViewModel = viewModel()
+) {
+    val egoera = viewModel.egoera
+    var erroreMezua  by remember { mutableStateOf<String?>(null) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFFFF3E0) // fondo crema claro
+        color = Color(0xFFFFF3E0)
     ) {
         Box(
             modifier = Modifier
@@ -35,18 +40,19 @@ fun LoginPantaila(viewModel: LoginPantailaViewModel = viewModel()) {
                     text = "ONGI ETORRI",
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontSize = 32.sp,
-                        color = Color(0xFF6D4C41) // marrón cálido
+                        color = Color(0xFF6D4C41)
                     )
                 )
 
                 OutlinedTextField(
-                    value = state.langileKodea,
+                    value = egoera.langileKodea,
                     onValueChange = {},
                     label = { Text("LANGILE-KODEA") },
-                    readOnly = true,
+                    enabled = false,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(64.dp),
+                        .height(64.dp)
+                        .clickable { viewModel.eremuEzarri (EremuEzarri .Kodea) },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF6D4C41),
@@ -55,13 +61,14 @@ fun LoginPantaila(viewModel: LoginPantailaViewModel = viewModel()) {
                 )
 
                 OutlinedTextField(
-                    value = state.pasahitza,
+                    value = egoera.pasahitza,
                     onValueChange = {},
                     label = { Text("PASAHITZA") },
-                    readOnly = true,
+                    enabled = false,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(64.dp),
+                        .height(64.dp)
+                        .clickable { viewModel.eremuEzarri (EremuEzarri .Pasahitza) },
                     shape = RoundedCornerShape(12.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF6D4C41),
@@ -69,20 +76,33 @@ fun LoginPantaila(viewModel: LoginPantailaViewModel = viewModel()) {
                     )
                 )
 
-                Teklatua(onKeyPress = { key -> viewModel.onKeyPressed(key) })
+                Teklatua(onKeyPress = { key -> viewModel.teklaZapaldu(key) })
 
                 Button(
-                    onClick = { viewModel.onLogin() },
+                    onClick = {
+                        viewModel.loginEgin(
+                            onSuccess = { navController.navigate("menu") },
+                            onError = { msg -> erroreMezua  = msg }
+                        )
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
                     shape = RoundedCornerShape(16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8BC34A), // verde suave
+                        containerColor = Color(0xFF8BC34A),
                         contentColor = Color.White
                     )
                 ) {
-                    Text("SAIOA HASI", fontSize = 18.sp)
+                    if (egoera.loading) {
+                        CircularProgressIndicator(
+                            color = Color.White,
+                            strokeWidth = 2.dp,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    } else {
+                        Text("SAIOA HASI", fontSize = 18.sp)
+                    }
                 }
 
                 Spacer(Modifier.height(32.dp))
@@ -95,7 +115,19 @@ fun LoginPantaila(viewModel: LoginPantailaViewModel = viewModel()) {
                     modifier = Modifier.align(Alignment.End)
                 )
             }
+
+            erroreMezua ?.let { msg ->
+                Snackbar(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
+                    action = {
+                        TextButton(onClick = { erroreMezua  = null }) {
+                            Text("Itxi")
+                        }
+                    }
+                ) { Text(msg) }
+            }
         }
     }
 }
-

@@ -1,4 +1,4 @@
-package com.example.loginapp.ui
+package com.example.androidapp.presentation.login
 
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
@@ -10,11 +10,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.shape.RoundedCornerShape
 
-
-
 @Composable
 fun Teklatua(onKeyPress: (String) -> Unit) {
-    val teklak = listOf("1","2","3","4","5","6","7","8","9","0","←","OK")
+    val teklak = listOf("1","2","3","4","5","6","7","8","9","","0","←")
 
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -26,7 +24,7 @@ fun Teklatua(onKeyPress: (String) -> Unit) {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 row.forEach { tekla ->
-                    val isSpecial = tekla == "←" || tekla == "OK"
+                    val isSpecial = tekla == "←" || tekla == ""
                     Button(
                         onClick = { onKeyPress(tekla) },
                         modifier = Modifier.size(80.dp),
@@ -43,4 +41,3 @@ fun Teklatua(onKeyPress: (String) -> Unit) {
         }
     }
 }
-
