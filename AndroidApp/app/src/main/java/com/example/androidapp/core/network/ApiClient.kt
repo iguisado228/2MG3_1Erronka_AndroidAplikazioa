@@ -6,8 +6,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
-    private const val Api_helbidea = "http://10.0.2.2:5000/"
-
+    private const val Api_helbidea = "http://192.168.1.101:5000/"
     private val loginEgiten by lazy {
         HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
     }
