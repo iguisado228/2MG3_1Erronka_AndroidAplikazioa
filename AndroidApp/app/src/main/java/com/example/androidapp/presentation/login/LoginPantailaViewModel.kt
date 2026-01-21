@@ -7,82 +7,99 @@ import androidx.lifecycle.ViewModel
 import com.example.androidapp.core.network.ApiClient
 import com.example.androidapp.data.dto.LangileaDto
 import com.example.androidapp.data.dto.LoginEskaera
-import com.example.androidapp.data.model.EremuEzarri
-import com.example.androidapp.data.model.LoginEgoera
+import com.example.androidapp.data.dto.LoginErantzuna
+import com.example.androidapp.data.model.LoginField
+import com.example.androidapp.data.model.LoginState
 import com.example.androidapp.data.remote.LoginApi
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class LoginPantailaViewModel : ViewModel() {
-    var egoera by mutableStateOf(LoginEgoera())
+
+    var state by mutableStateOf(LoginState())
         private set
 
     private val loginApi: LoginApi by lazy {
         ApiClient.retrofit.create(LoginApi::class.java)
     }
 
-    fun eremuEzarri(field: EremuEzarri) {
-        egoera = egoera.copy(eremuEzarri = field)
+    fun onFieldSelected(field: LoginField) {
+        state = state.copy(focusedField = field)
     }
 
-    fun teklaZapaldu(key: String) {
+    fun onKeyPress(key: String) {
         when (key) {
             "←" -> {
-                egoera = egoera.copy(
-                    langileKodea = if (egoera.eremuEzarri == EremuEzarri .Kodea)
-                        egoera.langileKodea.dropLast(1) else egoera.langileKodea,
-                    pasahitza = if (egoera.eremuEzarri == EremuEzarri .Pasahitza)
-                        egoera.pasahitza.dropLast(1) else egoera.pasahitza
+                state = state.copy(
+                    workerCode = if (state.focusedField == LoginField.Code)
+                        state.workerCode.dropLast(1) else state.workerCode,
+                    password = if (state.focusedField == LoginField.Password)
+                        state.password.dropLast(1) else state.password
                 )
             }
             else -> {
                 if (key.isNotEmpty()) {
-                    egoera = if (egoera.eremuEzarri == EremuEzarri .Kodea) {
-                        egoera.copy(langileKodea = egoera.langileKodea + key)
+                    state = if (state.focusedField == LoginField.Code) {
+                        state.copy(workerCode = state.workerCode + key)
                     } else {
-                        egoera.copy(pasahitza = egoera.pasahitza + key)
+                        state.copy(password = state.password + key)
                     }
                 }
             }
         }
     }
 
-    fun loginEgin(
+    fun login(
         onSuccess: (LangileaDto) -> Unit,
         onError: (String) -> Unit
     ) {
-        val kodea = egoera.langileKodea.toIntOrNull()
-        if (kodea == null || egoera.pasahitza.isBlank()) {
+        val code = state.workerCode.toIntOrNull()
+        if (code == null || state.password.isBlank()) {
             onError("Kodea zenbaki bat izan behar da eta pasahitza ezin da hutsik egon.")
             return
         }
 
+        state = state.copy(isLoading = true)
+
         val request = LoginEskaera(
-            Langile_kodea = kodea,
-            Pasahitza = egoera.pasahitza
+            Langile_kodea = code,
+            Pasahitza = state.password
         )
 
-        loginApi.login(request).enqueue(object : Callback<LangileaDto> {
-            override fun onResponse(call: Call<LangileaDto>, response: Response<LangileaDto>) {
-                egoera = egoera.copy(loading = false)
-                if (response.isSuccessful) {
-                    val langilea = response.body()
-                    if (langilea != null) {
-                        onSuccess(langilea)
-                    } else {
-                        onError("Errorea: gorputz hutsa.")
-                    }
-                } else {
-                    onError("Login okerra (${response.code()}).")
+        loginApi.login(request).enqueue(object : Callback<LoginErantzuna> {
+            override fun onResponse(call: Call<LoginErantzuna>, response: Response<LoginErantzuna>) {
+                state = state.copy(isLoading = false)
+
+                if (!response.isSuccessful) {
+                    onError("Errorea: ${response.code()}")
+                    return
                 }
+
+                val erantzuna = response.body()
+                if (erantzuna == null) {
+                    onError("Errorea: erantzun hutsa")
+                    return
+                }
+
+                if (!erantzuna.ok) {
+                    onError(erantzuna.message)
+                    return
+                }
+
+                val langilea = erantzuna.data
+                if (langilea == null) {
+                    onError("Errorea: daturik ez")
+                    return
+                }
+
+                onSuccess(langilea)
             }
 
-            override fun onFailure(call: Call<LangileaDto>, t: Throwable) {
-                egoera = egoera.copy(loading = false)
+            override fun onFailure(call: Call<LoginErantzuna>, t: Throwable) {
+                state = state.copy(isLoading = false)
                 onError("Sare errorea: ${t.message ?: "Ezezaguna"}")
             }
         })
     }
 }
-

@@ -1,129 +1,164 @@
 package com.example.androidapp.presentation.login
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.runtime.*
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.example.androidapp.data.model.EremuEzarri
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.RestaurantMenu
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.androidapp.core.SessionManager
+import com.example.androidapp.data.model.LoginField
 
 @Composable
 fun LoginPantaila(
     navController: NavController,
     viewModel: LoginPantailaViewModel = viewModel()
 ) {
-    val egoera = viewModel.egoera
-    var erroreMezua  by remember { mutableStateOf<String?>(null) }
+    val state = viewModel.state
+    var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = Color(0xFFFFF3E0)
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
-            contentAlignment = Alignment.Center
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .background(Color(0xFFF57C00), CircleShape),
+                contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "ONGI ETORRI",
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontSize = 32.sp,
-                        color = Color(0xFF6D4C41)
-                    )
-                )
-
-                OutlinedTextField(
-                    value = egoera.langileKodea,
-                    onValueChange = {},
-                    label = { Text("LANGILE-KODEA") },
-                    enabled = false,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .clickable { viewModel.eremuEzarri (EremuEzarri .Kodea) },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF6D4C41),
-                        unfocusedBorderColor = Color(0xFFBCAAA4)
-                    )
-                )
-
-                OutlinedTextField(
-                    value = egoera.pasahitza,
-                    onValueChange = {},
-                    label = { Text("PASAHITZA") },
-                    enabled = false,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .clickable { viewModel.eremuEzarri (EremuEzarri .Pasahitza) },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFF6D4C41),
-                        unfocusedBorderColor = Color(0xFFBCAAA4)
-                    )
-                )
-
-                Teklatua(onKeyPress = { key -> viewModel.teklaZapaldu(key) })
-
-                Button(
-                    onClick = {
-                        viewModel.loginEgin(
-                            onSuccess = { navController.navigate("menu") },
-                            onError = { msg -> erroreMezua  = msg }
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF8BC34A),
-                        contentColor = Color.White
-                    )
-                ) {
-                    if (egoera.loading) {
-                        CircularProgressIndicator(
-                            color = Color.White,
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    } else {
-                        Text("SAIOA HASI", fontSize = 18.sp)
-                    }
-                }
-
-                Spacer(Modifier.height(32.dp))
-
-                Text(
-                    text = "TEKNOBIDE",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = Color(0xFF6D4C41)
-                    ),
-                    modifier = Modifier.align(Alignment.End)
+                Icon(
+                    imageVector = Icons.Default.RestaurantMenu,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(60.dp)
                 )
             }
+            
+            Spacer(modifier = Modifier.height(24.dp))
 
-            erroreMezua ?.let { msg ->
+            Text(
+                text = "TEKNOBIDE",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFE65100)
+                )
+            )
+            
+            Spacer(modifier = Modifier.height(32.dp))
+
+            OutlinedTextField(
+                value = state.workerCode,
+                onValueChange = {},
+                label = { Text("LANGILE-KODEA") },
+                enabled = false,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { viewModel.onFieldSelected(LoginField.Code) },
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = Color.Black,
+                    disabledBorderColor = if (state.focusedField == LoginField.Code) Color(0xFFE65100) else Color(0xFFFFCCBC),
+                    disabledLabelColor = Color(0xFFE65100),
+                    disabledContainerColor = Color.White,
+                    disabledPlaceholderColor = Color.Gray
+                ),
+                textStyle = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = "*".repeat(state.password.length),
+                onValueChange = {},
+                label = { Text("PASAHITZA") },
+                enabled = false,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { viewModel.onFieldSelected(LoginField.Password) },
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledTextColor = Color.Black,
+                    disabledBorderColor = if (state.focusedField == LoginField.Password) Color(0xFFE65100) else Color(0xFFFFCCBC),
+                    disabledLabelColor = Color(0xFFE65100),
+                    disabledContainerColor = Color.White
+                ),
+                textStyle = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            Teklatua(onKeyPress = { key -> viewModel.onKeyPress(key) })
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Button(
+                onClick = {
+                    viewModel.login(
+                        onSuccess = { langilea ->
+                            SessionManager.currentUser = langilea
+                            navController.navigate("menu")
+                        },
+                        onError = { msg -> errorMessage = msg }
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                shape = RoundedCornerShape(28.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFF57C00),
+                    contentColor = Color.White
+                ),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+            ) {
+                if (state.isLoading) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    Text(
+                        text = "SAIOA HASI",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+
+        errorMessage?.let { msg ->
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
                 Snackbar(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp),
+                    modifier = Modifier.padding(16.dp),
+                    containerColor = Color(0xFFD32F2F),
+                    contentColor = Color.White,
                     action = {
-                        TextButton(onClick = { erroreMezua  = null }) {
-                            Text("Itxi")
+                        TextButton(onClick = { errorMessage = null }) {
+                            Text("ITXI", color = Color.White)
                         }
                     }
                 ) { Text(msg) }
