@@ -40,7 +40,8 @@ data class Message(
 fun TxataPantaila(
     navController: NavController,
     chatId: Int,
-    chatName: String
+    chatName: String,
+    viewModel: ChatViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
     // Determine icon based on name (simple logic for prototype)
     val headerIcon = when {
@@ -49,28 +50,30 @@ fun TxataPantaila(
         else -> Icons.Default.Restaurant // Default
     }
 
-    val messages = listOf(
-        Message(
-            1,
-            "Sukaldaria izanez gero mezua bidaltzerakoan sukaldariaren ikonoa eta izena aterako dira",
-            false,
-            Icons.Default.Restaurant
-        ),
-        Message(
-            2,
-            "Langile bakoitza haren postuaren ikono konkretua izango dute txatean eta temak beti berdinak izango dira, horrela haien artean hitz egin ahal izango dute distrakzio gehiegirik gabe",
-            true,
-            Icons.Default.RoomService
-        )
-    )
-
+    val messages = viewModel.messages
     var messageText by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+
+    // Auto-scroll to bottom when new messages arrive
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
+        }
+    }
 
     LaunchedEffect(Unit) {
+        viewModel.connect()
         focusRequester.requestFocus()
-        keyboardController?.show()
+        // keyboardController?.show() // Optional: Show keyboard on start
+    }
+
+    // Disconnect when leaving the screen
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.disconnect()
+        }
     }
 
     Scaffold(
@@ -88,8 +91,26 @@ fun TxataPantaila(
                 .padding(paddingValues)
                 .background(Color(0xFFFFF3E0)) // Light beige
         ) {
+            // Connection Status
+            if (!viewModel.isConnected) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color(0xFFFFCCBC))
+                        .padding(8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = viewModel.connectionError ?: "Konektatzen...",
+                        color = Color.Black,
+                        fontSize = 12.sp
+                    )
+                }
+            }
+
             // Messages List
             LazyColumn(
+                state = listState,
                 modifier = Modifier
                     .weight(1f)
                     .padding(16.dp),
@@ -122,11 +143,9 @@ fun TxataPantaila(
                             .focusRequester(focusRequester),
                         placeholder = {
                             Text(
-                                text = "Soilik idatzizko mezuak bidali daitezke, ez argazki ez ezer langileak distraitu ez daitezen",
+                                text = "Idatzi mezua...",
                                 color = Color.Black.copy(alpha = 0.6f),
-                                fontSize = 12.sp,
-                                maxLines = 2,
-                                lineHeight = 14.sp
+                                fontSize = 14.sp
                             )
                         },
                         colors = OutlinedTextFieldDefaults.colors(
@@ -146,8 +165,10 @@ fun TxataPantaila(
                             .size(50.dp)
                             .background(Color(0xFFF57C00), CircleShape)
                             .clickable {
-                                // Send action placeholder
-                                messageText = ""
+                                if (messageText.isNotBlank()) {
+                                    viewModel.sendMessage(messageText)
+                                    messageText = ""
+                                }
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -159,8 +180,6 @@ fun TxataPantaila(
                         )
                     }
                 }
-                
-                // Keyboard placeholder removed
             }
         }
     }
@@ -186,8 +205,15 @@ fun MessageItem(message: Message) {
         Box(
             modifier = Modifier
                 .widthIn(max = 280.dp)
-                .background(Color(0xFFFFCCBC), RoundedCornerShape(16.dp))
-                .border(1.dp, Color(0xFFF57C00), RoundedCornerShape(16.dp)) // Optional border to match style
+                .background(
+                    color = if (message.isMe) Color(0xFFFFE0B2) else Color.White,
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .border(
+                    width = 1.dp,
+                    color = if (message.isMe) Color(0xFFF57C00) else Color.LightGray,
+                    shape = RoundedCornerShape(16.dp)
+                )
                 .padding(12.dp)
         ) {
             Text(
