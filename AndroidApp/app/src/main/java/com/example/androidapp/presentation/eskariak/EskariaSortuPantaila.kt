@@ -229,9 +229,11 @@ fun EskariaSortuPantaila(
                     ) {
                         val filteredProducts = egoera.produktuak.filter { it.mota == egoera.kategoriaAukeratua }
                         items(filteredProducts) { product ->
+                            val quantity = egoera.saskia[product.id] ?: 0
                             ProductItem(
                                 product = product,
-                                quantity = egoera.saskia[product.id] ?: 0,
+                                quantity = quantity,
+                                isAddEnabled = quantity < product.stock,
                                 onAdd = { viewModel.gehituProduktua(product.id) },
                                 onRemove = { viewModel.kenduProduktua(product.id) }
                             )
@@ -263,9 +265,11 @@ fun EskariaSortuPantaila(
                 ) {
                     val cartProducts = egoera.saskia.keys.mapNotNull { id -> viewModel.getProduktuaById(id) }
                     items(cartProducts) { product ->
+                        val quantity = egoera.saskia[product.id] ?: 0
                         CartItem(
                             product = product,
-                            quantity = egoera.saskia[product.id] ?: 0,
+                            quantity = quantity,
+                            isAddEnabled = quantity < product.stock,
                             onAdd = { viewModel.gehituProduktua(product.id) },
                             onRemove = { viewModel.kenduProduktua(product.id) }
                         )
@@ -327,6 +331,7 @@ fun CategoryTab(text: String, isSelected: Boolean, onClick: () -> Unit) {
 fun ProductItem(
     product: ProduktuaDto,
     quantity: Int,
+    isAddEnabled: Boolean = true,
     onAdd: () -> Unit,
     onRemove: () -> Unit
 ) {
@@ -372,6 +377,7 @@ fun ProductItem(
             
             QuantitySelector(
                 quantity = quantity,
+                isAddEnabled = isAddEnabled,
                 onAdd = onAdd,
                 onRemove = onRemove,
                 backgroundColor = Color(0xFFFFF3E0)
@@ -384,6 +390,7 @@ fun ProductItem(
 fun CartItem(
     product: ProduktuaDto,
     quantity: Int,
+    isAddEnabled: Boolean = true,
     onAdd: () -> Unit,
     onRemove: () -> Unit
 ) {
@@ -401,6 +408,7 @@ fun CartItem(
         
         QuantitySelector(
             quantity = quantity,
+            isAddEnabled = isAddEnabled,
             onAdd = onAdd,
             onRemove = onRemove,
             backgroundColor = Color.Transparent, // Transparent to blend with dark bg, but maybe needs a lighter container
@@ -412,6 +420,7 @@ fun CartItem(
 @Composable
 fun QuantitySelector(
     quantity: Int,
+    isAddEnabled: Boolean = true,
     onAdd: () -> Unit,
     onRemove: () -> Unit,
     backgroundColor: Color,
@@ -442,11 +451,15 @@ fun QuantitySelector(
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
             
-            IconButton(onClick = onAdd, modifier = Modifier.size(32.dp)) {
+            IconButton(
+                onClick = onAdd, 
+                enabled = isAddEnabled,
+                modifier = Modifier.size(32.dp)
+            ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Gehitu",
-                    tint = contentColor
+                    tint = if (isAddEnabled) contentColor else contentColor.copy(alpha = 0.3f)
                 )
             }
         }

@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
     const val BASE_URL = "http://192.168.1.112:5000/"
-    //const val BASE_URL = "http://10.0.2.2:5000/" // Localhost
+    //const val BASE_URL = "http://192.168.1.202:5000/" // Localhost
 
     private const val Api_helbidea = BASE_URL
     private val loginEgiten by lazy {
