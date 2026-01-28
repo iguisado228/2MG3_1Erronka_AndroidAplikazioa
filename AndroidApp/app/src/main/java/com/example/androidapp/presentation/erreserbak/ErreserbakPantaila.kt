@@ -102,7 +102,6 @@ fun ErreserbaTxartela(erreserba: ErreserbaDto, mahaiaZenbakia: Int?) {
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Header: Name and Status
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -122,7 +121,6 @@ fun ErreserbaTxartela(erreserba: ErreserbaDto, mahaiaZenbakia: Int?) {
                 color = Color(0xFFFFE0B2)
             )
 
-            // Details
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 ErreserbaDetailItem(
                     icon = Icons.Default.CalendarToday,
