@@ -25,6 +25,7 @@ import com.example.androidapp.data.dto.ProduktuaDto
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import com.example.androidapp.core.network.ApiClient
 import com.example.androidapp.core.SessionManager
@@ -341,26 +342,60 @@ fun ProductItem(
             .padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Image
         Surface(
             modifier = Modifier.size(80.dp),
             shape = RoundedCornerShape(12.dp),
             color = Color.LightGray
         ) {
-             val imageUrl = "${ApiClient.BASE_URL}irudiak/${product.izena}.jpg"
-             AsyncImage(
-                model = imageUrl,
+            val context = LocalContext.current
+            val model = remember(product.izena) {
+                var normalizedName = product.izena.trim().lowercase()
+                    .replace(" ", "_")
+                    .replace("-", "_")
+                    .replace("á", "a")
+                    .replace("é", "e")
+                    .replace("í", "i")
+                    .replace("ó", "o")
+                    .replace("ú", "u")
+                    .replace("ñ", "n")
+                    .replace("izokina", "izokin")
+                    .replace("galletak", "galleta")
+                    .replace("solomoa", "solomo")
+                    .replace("txipiroiak", "txipiroi")
+                    .replace("[^a-z0-9_]".toRegex(), "")
+                
+                if (normalizedName == "solomo_eta_patatak") normalizedName = "txerri_solomo_patatekin"
+                if (normalizedName == "izokin_entsalada") normalizedName = "izokin_plantxan"
+                if (normalizedName == "jogurta_eta_granola") normalizedName = "eztia_eta_jogurta"
+                if (normalizedName == "galleta") normalizedName = "galleta_eta_mermelada"
+                if (normalizedName == "izokin") normalizedName = "izokin_plantxan"
+                if (normalizedName == "solomo") normalizedName = "txerri_solomo_patatekin"
+                if (normalizedName == "txipiroi") normalizedName = "txipiroi_plantxan"
+                if (normalizedName == "jogurta") normalizedName = "eztia_eta_jogurta"
+                if (normalizedName == "albondigak") normalizedName = "albondigak_tomate_saltsan"
+                if (normalizedName == "kalamarrak" || normalizedName == "kalamar_ogitartekoa") normalizedName = "aliolidun_kalamar_ogitartekoa"
+                if (normalizedName == "piperrak" || normalizedName == "piper_beteak") normalizedName = "bakailaoz_betetako_piperrak"
+                if (normalizedName == "kostilak") normalizedName = "barbekoa_kostilak"
+                if (normalizedName.contains("pomal")) normalizedName = "pomal_ardo_beltza"
+                if (normalizedName == "flana") normalizedName = "etxeko_flana"
+                if (normalizedName == "natillak") normalizedName = "etxeko_natillak"
+                if (normalizedName == "sagardoa") normalizedName = "sagardo_botila"
+                if (normalizedName == "hirugiarra" || normalizedName == "hirugiar_ogitartekoa") normalizedName = "hirugiar_eta_gazta_ogitartekoa"
+                if (normalizedName == "ardo_beltza") normalizedName = "pomal_ardo_beltza"
+                if (normalizedName == "oilasko_hegalak") normalizedName = "oilasko_hegalak_ketuta"
+                if (normalizedName == "mejilloiak") normalizedName = "mejilloiak_lurrinez"
+
+                val resId = context.resources.getIdentifier(normalizedName, "drawable", context.packageName)
+                
+                if (resId != 0) resId else "${ApiClient.BASE_URL}irudiak/${product.izena}.jpg"
+            }
+
+            AsyncImage(
+                model = model,
                 contentDescription = product.izena,
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop,
-                error = remember {
-                     // Fallback content if image fails
-                     null // Or use a Painter/Vector
-                }
+                contentScale = ContentScale.Crop
             )
-            // If AsyncImage is loading or fails, we might want a placeholder.
-            // But for simplicity, let's trust AsyncImage handles it or leaves it empty/gray.
-            // To be safe, we can put a Box behind it or use the 'error' parameter to show an icon.
         }
         
         Spacer(modifier = Modifier.width(16.dp))
