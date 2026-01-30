@@ -75,8 +75,7 @@ class ErreserbakViewModel : ViewModel() {
             }
 
             override fun onFailure(call: Call<List<MahaiaDto>>, t: Throwable) {
-                // Silently fail for tables or log it, but don't block reservations
-            }
+           }
         })
     }
 }

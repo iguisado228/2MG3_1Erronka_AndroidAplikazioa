@@ -5,9 +5,9 @@ import com.example.androidapp.data.dto.MahaiaDto
 data class CreateReservationState(
     val customerName: String = "",
     val phone: String = "",
-    val personCount: String = "", // String for input handling
-    val date: String = "", // YYYY-MM-DD
-    val time: String = "", // HH:mm
+    val personCount: String = "",
+    val date: String = "",
+    val time: String = "",
     val selectedTable: MahaiaDto? = null,
     val tables: List<MahaiaDto> = emptyList(),
     val isLoading: Boolean = false,

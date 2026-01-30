@@ -35,7 +35,6 @@ fun ErreserbaSortuPantaila(
     val state = viewModel.state
     val context = LocalContext.current
 
-    // Navigate back on success
     LaunchedEffect(state.isSuccess) {
         if (state.isSuccess) {
             navController.popBackStack()
@@ -57,7 +56,6 @@ fun ErreserbaSortuPantaila(
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    // Allowed times list
     val allowedTimes = listOf(
         "12:30", "13:00", "13:30", "14:00", "14:30", "15:00", "15:30",
         "20:00", "20:30", "21:00", "21:30", "22:00", "22:30", "23:00"
@@ -76,7 +74,7 @@ fun ErreserbaSortuPantaila(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFFFF3E0)) // Light Orange/Beige background
+                .background(Color(0xFFFFF3E0))
         ) {
             if (state.isLoading) {
                 CircularProgressIndicator(
@@ -93,7 +91,6 @@ fun ErreserbaSortuPantaila(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Title Card
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -126,7 +123,6 @@ fun ErreserbaSortuPantaila(
                             )
                         }
 
-                        // Bezeroa
                         OutlinedTextField(
                             value = state.customerName,
                             onValueChange = { viewModel.onCustomerNameChanged(it) },
@@ -141,7 +137,6 @@ fun ErreserbaSortuPantaila(
                             )
                         )
 
-                        // Telefonoa
                         OutlinedTextField(
                             value = state.phone,
                             onValueChange = { viewModel.onPhoneChanged(it) },
@@ -157,7 +152,6 @@ fun ErreserbaSortuPantaila(
                             )
                         )
 
-                        // Pertsona Kopurua
                         OutlinedTextField(
                             value = state.personCount,
                             onValueChange = { viewModel.onPersonCountChanged(it) },
@@ -177,7 +171,6 @@ fun ErreserbaSortuPantaila(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // Data
                             Box(modifier = Modifier.weight(1f)) {
                                 OutlinedTextField(
                                     value = state.date,
@@ -199,7 +192,6 @@ fun ErreserbaSortuPantaila(
                                 )
                             }
                             
-                             // Ordua Dropdown
                             Box(modifier = Modifier.weight(1f)) {
                                 OutlinedTextField(
                                     value = state.time,
@@ -230,7 +222,7 @@ fun ErreserbaSortuPantaila(
                                     expanded = timeExpanded,
                                     onDismissRequest = { timeExpanded = false },
                                     modifier = Modifier
-                                        .fillMaxWidth(0.4f) // Adjust width contextually or just let it wrap
+                                        .fillMaxWidth(0.4f)
                                         .heightIn(max = 300.dp)
                                         .background(Color.White)
                                 ) {

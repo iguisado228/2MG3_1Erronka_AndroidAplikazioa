@@ -4,7 +4,7 @@ data class ErreserbaSortuDto(
     val bezeroIzena: String,
     val telefonoa: String,
     val pertsonaKopurua: Int,
-    val egunaOrdua: String, // Format: 2024-01-20T14:30:00
+    val egunaOrdua: String,
     val prezioTotala: Double,
     val fakturaRuta: String = "",
     val langileaId: Int,

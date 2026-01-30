@@ -40,7 +40,7 @@ fun ErreserbakPantaila(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(Color(0xFFFFF3E0)) // Light Orange/Beige background
+                .background(Color(0xFFFFF3E0))
         ) {
             if (egoera.isLoading) {
                 CircularProgressIndicator(
